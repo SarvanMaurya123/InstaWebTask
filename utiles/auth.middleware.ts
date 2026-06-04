@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import User from "../schema/user";
 
@@ -8,7 +8,7 @@ export const protect = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.cookies.accessToken;
+    const token = req.cookies?.accessToken;
 
     if (!token) {
       return res.status(401).json({
@@ -38,6 +38,8 @@ export const protect = async (
 
     next();
   } catch (error: any) {
+    console.error("Protect Middleware Error:", error.message);
+
     return res.status(401).json({
       success: false,
       message: error.message,
