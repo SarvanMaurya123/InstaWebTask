@@ -10,11 +10,12 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://insta-web-task-frontend.vercel.app/",
+      "https://insta-web-task-frontend.vercel.app",
     ],
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser
