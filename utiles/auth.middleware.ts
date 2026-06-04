@@ -8,37 +8,22 @@ export const protect = async (
   next: NextFunction
 ) => {
   try {
-    const token = req.cookies?.accessToken;
+    console.log("Cookies:", req.cookies);
 
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Access token missing",
-      });
-    }
+    const token = req.cookies.accessToken;
+
+    console.log("Token:", token ? "FOUND" : "MISSING");
 
     const decoded = jwt.verify(
       token,
       process.env.JWT_ACCESS_SECRET as string
-    ) as {
-      userId: string;
-      role: string;
-    };
+    );
 
-    const user = await User.findById(decoded.userId).select("-password");
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    req.user = user;
+    console.log("Decoded:", decoded);
 
     next();
   } catch (error: any) {
-    console.error("Protect Middleware Error:", error.message);
+    console.log("AUTH ERROR:", error.message);
 
     return res.status(401).json({
       success: false,
