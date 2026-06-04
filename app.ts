@@ -8,11 +8,10 @@ const app: Application = express();
 // Middlewares
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://insta-web-task-frontend.vercel.app",
-    ],
+    origin: "https://insta-web-task-frontend.vercel.app",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
