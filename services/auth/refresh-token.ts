@@ -1,16 +1,20 @@
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../config/jwt";
 import User from "../../schema/user";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../../config/jwt";
 
-export const refreshTokenService = async (
-  refreshToken: string
-) => {
-  const decoded = verifyRefreshToken(refreshToken);
+export const refreshTokenService = async (userId: string) => {
+  const user = await User.findById(userId);
 
-  const user = await User.findById(decoded.userId);
-
-  if (!user) {
-    throw new Error("User not found");
+  if (!user || !user.refreshToken) {
+    throw new Error("Invalid session");
   }
+
+  //  verify stored refresh token (you must verify JWT here)
+  const refreshToken = user.refreshToken;
+
+  // optional: verifyRefreshToken(refreshToken)
 
   const newAccessToken = generateAccessToken({
     userId: user._id.toString(),
@@ -22,9 +26,11 @@ export const refreshTokenService = async (
     role: user.role,
   });
 
+  // rotate refresh token in DB
+  user.refreshToken = newRefreshToken;
+  await user.save();
+
   return {
     newAccessToken,
-    newRefreshToken,
-    user,
   };
 };

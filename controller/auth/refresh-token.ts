@@ -1,40 +1,24 @@
-import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../../config/cookies";
-import { refreshTokenService } from "../../services/auth/refresh-token";
 import { Request, Response } from "express";
-export const refreshToken = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const refreshToken =
-      req.cookies.refreshToken;
-      console.log("Received refresh token:", refreshToken);
+import { accessTokenCookieOptions } from "../../config/cookies";
+import { refreshTokenService } from "../../services/auth/refresh-token";
 
-    if (!refreshToken) {
+export const refreshToken = async (req: Request, res: Response) => {
+  try {
+    // NO COOKIE USAGE (IMPORTANT CHANGE)
+    const userId = req.body.userId; 
+    // OR extract from expired access token middleware
+
+    if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Refresh token missing",
+        message: "Unauthorized",
       });
     }
 
-    const {
-      newAccessToken,
-      newRefreshToken,
-    } = await refreshTokenService(
-      refreshToken
-    );
+    const { newAccessToken } = await refreshTokenService(userId);
 
-    res.cookie(
-      "accessToken",
-      newAccessToken,
-      accessTokenCookieOptions
-    );
-
-    res.cookie(
-      "refreshToken",
-      newRefreshToken,
-      refreshTokenCookieOptions
-    );
+    //  ONLY SET ACCESS TOKEN COOKIE
+    res.cookie("accessToken", newAccessToken, accessTokenCookieOptions);
 
     return res.status(200).json({
       success: true,

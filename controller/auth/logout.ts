@@ -3,24 +3,21 @@ import { verifyRefreshToken } from "../../config/jwt";
 import user from "../../schema/user";
 
 export const logout = async (req: Request, res: Response) => {
-  const refreshToken = req.cookies.refreshToken;
+  const userId = req.body.userId;
 
-  if (refreshToken) {
-    const decoded = verifyRefreshToken(refreshToken);
+  if (userId) {
+    const userData = await user.findById(userId);
 
-    const User = await user.findById(decoded.userId);
-
-    if (User) {
-      User.refreshToken = null; // 🔥 kill session
-      await User.save();
+    if (userData) {
+      userData.refreshToken = null; // kill session
+      await userData.save();
     }
   }
 
   res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
 
   return res.status(200).json({
     success: true,
-    message: "Logged out successfully",
+    message: "Logged out",
   });
 };
