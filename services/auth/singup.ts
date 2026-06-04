@@ -6,6 +6,11 @@ interface SignupData {
   password: string;
 }
 
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../../config/jwt";
+
 export const signupService = async ({
   name,
   email,
@@ -19,11 +24,22 @@ export const signupService = async ({
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
+  const refreshToken = generateRefreshToken({
+    userId: "temp",
+    role: "USER",
+  });
+
   const user = await User.create({
     name,
     email,
     password: hashedPassword,
+    refreshToken,
   });
 
-  return user;
+  const accessToken = generateAccessToken({
+    userId: user._id.toString(),
+    role: user.role,
+  });
+
+  return { user, accessToken, refreshToken };
 };

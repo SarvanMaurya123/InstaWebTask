@@ -17,11 +17,6 @@ app.use(
   })
 );
 
-app.options("*", cors({
-  origin: "https://insta-web-task-frontend.vercel.app",
-  credentials: true,
-}));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser

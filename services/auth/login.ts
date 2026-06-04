@@ -5,25 +5,20 @@ import {
   generateRefreshToken,
 } from "../../config/jwt";
 
-export const loginService = async (
-  email: string,
-  password: string
-) => {
+export const loginService = async (email: string, password: string) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
     throw new Error("Invalid credentials");
   }
 
-  const isMatch = await bcrypt.compare(
-    password,
-    user.password
-  );
+  const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
     throw new Error("Invalid credentials");
   }
 
+  // 🔥 generate tokens
   const accessToken = generateAccessToken({
     userId: user._id.toString(),
     role: user.role,
@@ -34,8 +29,18 @@ export const loginService = async (
     role: user.role,
   });
 
+  // 🔥 IMPORTANT: store refresh token in DB (THIS FIXES YOUR MAIN BUG)
+  user.refreshToken = refreshToken;
+  await user.save();
+
   return {
-    user,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+    accessToken,
+    refreshToken,
   };
 };
-
