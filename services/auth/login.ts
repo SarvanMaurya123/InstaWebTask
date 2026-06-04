@@ -18,7 +18,6 @@ export const loginService = async (email: string, password: string) => {
     throw new Error("Invalid credentials");
   }
 
-  // 🔥 generate tokens
   const accessToken = generateAccessToken({
     userId: user._id.toString(),
     role: user.role,
@@ -29,7 +28,7 @@ export const loginService = async (email: string, password: string) => {
     role: user.role,
   });
 
-  // 🔥 IMPORTANT: SAVE refresh token in DB (SESSION TRACKING)
+  //  STORE ONLY IN DB (NOT COOKIE)
   user.refreshToken = refreshToken;
   await user.save();
 
@@ -41,6 +40,5 @@ export const loginService = async (email: string, password: string) => {
       role: user.role,
     },
     accessToken,
-    refreshToken,
   };
 };

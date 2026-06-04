@@ -1,44 +1,29 @@
 import bcrypt from "bcryptjs";
 import User from "../../schema/user";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from "../../config/jwt";
+interface SignupData {
+  name: string;
+  email: string;
+  password: string;
+}
 
-export const loginService = async (email: string, password: string) => {
-  const user = await User.findOne({ email }).select("+password");
+export const signupService = async ({
+  name,
+  email,
+  password,
+}: SignupData) => {
+  const existingUser = await User.findOne({ email });
 
-  if (!user) {
-    throw new Error("Invalid credentials");
+  if (existingUser) {
+    throw new Error("User already exists");
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const hashedPassword = await bcrypt.hash(password, 12);
 
-  if (!isMatch) {
-    throw new Error("Invalid credentials");
-  }
-
-  const accessToken = generateAccessToken({
-    userId: user._id.toString(),
-    role: user.role,
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
   });
 
-  const refreshToken = generateRefreshToken({
-    userId: user._id.toString(),
-    role: user.role,
-  });
-
-  //  STORE ONLY IN DB (NOT COOKIE)
-  user.refreshToken = refreshToken;
-  await user.save();
-
-  return {
-    user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
-    accessToken,
-  };
+  return user;
 };
