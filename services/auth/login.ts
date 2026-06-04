@@ -29,7 +29,7 @@ export const loginService = async (email: string, password: string) => {
     role: user.role,
   });
 
-  // 🔥 IMPORTANT: store refresh token in DB (THIS FIXES YOUR MAIN BUG)
+  // 🔥 IMPORTANT: SAVE refresh token in DB (SESSION TRACKING)
   user.refreshToken = refreshToken;
   await user.save();
 
