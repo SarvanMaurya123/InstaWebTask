@@ -36,8 +36,6 @@ export const loginService = async (
 
   return {
     user,
-    accessToken,
-    refreshToken,
   };
 };
 

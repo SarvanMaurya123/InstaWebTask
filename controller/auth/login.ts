@@ -1,31 +1,32 @@
-import { accessTokenCookieOptions, refreshTokenCookieOptions } from "../../config/cookies";
+import {
+  accessTokenCookieOptions,
+  refreshTokenCookieOptions,
+} from "../../config/cookies";
+
 import { loginService } from "../../services/auth/login";
+import { generateAccessToken, generateRefreshToken } from "../../config/jwt";
 import { Request, Response } from "express";
 
-export const login = async (
-  req: Request,
-  res: Response
-) => {
+export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    const {
-      user,
-      accessToken,
-      refreshToken,
-    } = await loginService(email, password);
+    const { user } = await loginService(email, password);
 
-    res.cookie(
-      "accessToken",
-      accessToken,
-      accessTokenCookieOptions
-    );
+    // 🔥 generate tokens HERE
+    const accessToken = generateAccessToken({
+      userId: user._id.toString(),
+      role: user.role,
+    });
 
-    res.cookie(
-      "refreshToken",
-      refreshToken,
-      refreshTokenCookieOptions
-    );
+    const refreshToken = generateRefreshToken({
+      userId: user._id.toString(),
+      role: user.role,
+    });
+
+    //set cookies
+    res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+    res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
 
     return res.status(200).json({
       success: true,
@@ -36,8 +37,6 @@ export const login = async (
         email: user.email,
         role: user.role,
       },
-      accessToken,
-        refreshToken,
     });
   } catch (error: any) {
     return res.status(401).json({
