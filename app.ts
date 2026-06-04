@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 const app: Application = express();
 
 // Middlewares
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin: "https://insta-web-task-frontend.vercel.app",
@@ -14,6 +16,11 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors({
+  origin: "https://insta-web-task-frontend.vercel.app",
+  credentials: true,
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
